@@ -1,4 +1,4 @@
-package model;
+package com.cartwise.cartwise.model;
 
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
@@ -21,7 +21,6 @@ public class RecipeSuggestion {
     private String description;
     private String ingredients;
 
-    @ManyToMany(mappedBy = "recipe_suggestion")
-    @JoinColumn(name = "grocery_item")
+    @ManyToMany(mappedBy = "recipeSuggestion")
     private List<GroceryItem> groceryItem;
 }

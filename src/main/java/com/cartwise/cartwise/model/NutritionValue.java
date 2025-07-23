@@ -1,4 +1,4 @@
-package model;
+package com.cartwise.cartwise.model;
 
 
 import jakarta.persistence.*;

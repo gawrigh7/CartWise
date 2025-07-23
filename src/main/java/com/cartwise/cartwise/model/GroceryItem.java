@@ -1,4 +1,4 @@
-package model;
+package com.cartwise.cartwise.model;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
@@ -31,6 +31,11 @@ public class GroceryItem {
     private User user;
 
     @ManyToMany
+    @JoinTable(
+            name = "grocery_item_recipe_suggestion",
+            joinColumns = @JoinColumn(name = "grocery_item_id"),
+            inverseJoinColumns = @JoinColumn(name = "recipe_suggestion_id")
+    )
     @JsonIgnore
     private List<RecipeSuggestion> recipeSuggestion;
 
