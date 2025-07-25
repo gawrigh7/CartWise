@@ -12,9 +12,11 @@ import java.util.Optional;
 public class GroceryItemService {
 
     private final GroceryItemRepo groceryItemRepo;
+    private final AiService aiService;
 
-    public GroceryItemService(GroceryItemRepo groceryItemRepo) {
+    public GroceryItemService(GroceryItemRepo groceryItemRepo, AiService aiService) {
         this.groceryItemRepo = groceryItemRepo;
+        this.aiService = aiService;
     }
 
     public Optional<GroceryItem> findByName(String name) {

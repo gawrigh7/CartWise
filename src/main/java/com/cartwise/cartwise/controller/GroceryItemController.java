@@ -1,7 +1,6 @@
 package com.cartwise.cartwise.controller;
 
 import com.cartwise.cartwise.model.GroceryItem;
-import com.cartwise.cartwise.repository.GroceryItemRepo;
 import com.cartwise.cartwise.service.GroceryItemService;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;

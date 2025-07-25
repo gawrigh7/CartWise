@@ -19,7 +19,15 @@ public class RecipeSuggestion {
 
     private String title;
     private String description;
-    private String ingredients;
+    private boolean favorite;
+
+    @ManyToMany
+    @JoinTable(
+            name = "recipe_ingredients",
+            joinColumns = @JoinColumn(name = "recipe_id"),
+            inverseJoinColumns = @JoinColumn(name = "grocery_item_id")
+    )
+    private List<GroceryItem> ingredients;
 
     @ManyToMany(mappedBy = "recipeSuggestion")
     private List<GroceryItem> groceryItem;
