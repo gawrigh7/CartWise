@@ -30,23 +30,35 @@ public class AiService {
                 .map(GroceryItem::getName)
                 .collect(Collectors.joining(", "));
 
-        String prompt = """
+        if (input.isEmpty()) {
+            throw new RuntimeException("Empty recipe list");
+        }
+
+            String systemMessage = """
+    You are a recipe assistant that responds ONLY in valid JSON format.
+    Never include any text outside of the JSON response.
+    Always return a JSON array of recipe objects.
+    """;
+
+        String userPrompt = """
     I have the following groceries: %s.
     Suggest 3 recipes I could cook using only these items.
     
-    Return your response as a JSON array like this:
+    Return as JSON array:
     [
       {
         "title": "Recipe Title",
-        "description": "How to make it...",
-        "ingredients": ["item1", "item2"]
-      },
-      ...
+        "description": "How to make it..."
+      }
     ]
     """.formatted(input);
 
-        System.out.println("Calling OpenAI with: " + prompt);
-        return chat(prompt);
+        return chatClient
+                .prompt()
+                .system(systemMessage)
+                .user(userPrompt)
+                .call()
+                .content();
     }
 
     public List<RecipeSuggestion> parseRecipeJson(String json) {

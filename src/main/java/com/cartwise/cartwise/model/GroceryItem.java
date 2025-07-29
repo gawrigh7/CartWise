@@ -22,9 +22,6 @@ public class GroceryItem {
     private String type;
     private boolean available;
 
-    @OneToOne
-    @JoinColumn(name = "nutrition_value", nullable = false)
-    private NutritionValue nutritionValue;
 
     @ManyToOne
     @JsonIgnore

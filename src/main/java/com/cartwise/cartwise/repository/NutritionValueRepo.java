@@ -1,18 +1,14 @@
 package com.cartwise.cartwise.repository;
 
+import com.cartwise.cartwise.model.NutritionValue;
 import com.cartwise.cartwise.model.RecipeSuggestion;
-import com.cartwise.cartwise.model.User;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 
-import java.util.List;
 import java.util.Optional;
 
 @Repository
-public interface RecipeSuggestionRepo extends JpaRepository<RecipeSuggestion, Long> {
+public interface NutritionValueRepo extends JpaRepository<NutritionValue, Long> {
 
-    Optional<RecipeSuggestion> findByTitle(String title);
-
-
-
+    Optional<NutritionValue> findByRecipeSuggestion(RecipeSuggestion recipeSuggestion);
 }

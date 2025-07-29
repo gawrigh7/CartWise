@@ -5,7 +5,9 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 @Entity
 @Data
@@ -20,8 +22,15 @@ public class User {
     private String username;
     private String password;
     private String email;
-    private String phone;
 
     @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, fetch = FetchType.EAGER)
     private List<GroceryItem> groceryItem;
+
+    @ManyToMany
+    @JoinTable (
+        name = "user_favorites",
+                joinColumns = @JoinColumn(name = "user_id"),
+        inverseJoinColumns = @JoinColumn(name = "recipe_id")
+    )
+    public Set<RecipeSuggestion> favoriteRecipes = new HashSet<>();
 }

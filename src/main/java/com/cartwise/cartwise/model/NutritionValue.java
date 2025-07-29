@@ -21,7 +21,10 @@ public class NutritionValue {
     private int fats;
     private int carbohydrates;
 
+
     @OneToOne
-    private GroceryItem groceryItem;
+    private RecipeSuggestion recipeSuggestion;
+
+
 
 }
