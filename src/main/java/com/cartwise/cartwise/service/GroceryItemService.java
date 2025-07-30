@@ -23,9 +23,6 @@ public class GroceryItemService {
         return groceryItemRepo.findByName(name);
     }
 
-    public List<GroceryItem> findByType(String type) {
-        return groceryItemRepo.findByType(type);
-    }
 
     public List<GroceryItem> findAll() {
         return groceryItemRepo.findAll();
@@ -42,6 +39,11 @@ public class GroceryItemService {
     @Transactional
     public void delete(GroceryItem groceryItem) {
         groceryItemRepo.delete(groceryItem);
+    }
+
+    @Transactional
+    public void deleteByIdInBatch(List<GroceryItem> groceryItems) {
+        groceryItemRepo.deleteAllInBatch(groceryItems);
     }
 
     @Transactional

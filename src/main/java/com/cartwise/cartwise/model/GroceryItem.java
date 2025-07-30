@@ -19,7 +19,6 @@ public class GroceryItem {
     private Long groceryId;
 
     private String name;
-    private String type;
     private boolean available;
 
 

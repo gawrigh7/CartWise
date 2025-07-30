@@ -25,12 +25,6 @@ public class GroceryItemController {
         return ResponseEntity.ok(grocery.orElse(new GroceryItem()));
     }
 
-    @GetMapping ("/type/{type}")
-    public ResponseEntity<GroceryItem> getGroceryItemByType(@PathVariable String type) {
-        List<GroceryItem> groceryList = groceryItemService.findByType(type);
-        return ResponseEntity.ok(groceryList.stream().findFirst().get());
-    }
-
     @GetMapping("/id/{id}")
     public ResponseEntity<GroceryItem> getGroceryItemById(@PathVariable Long id) {
         Optional<GroceryItem> grocery = groceryItemService.findById(id);
@@ -54,7 +48,13 @@ public class GroceryItemController {
         return ResponseEntity.ok(groceryItem);
     }
 
-    @DeleteMapping("/{id}")
+    @DeleteMapping("/delete/checked")
+    public ResponseEntity<Void> deleteGroceryBatch(@RequestBody List<GroceryItem> groceryItems) {
+        groceryItemService.deleteByIdInBatch(groceryItems);
+        return ResponseEntity.ok().build();
+    }
+
+    @DeleteMapping("/delete/{id}")
     public ResponseEntity<Void> deleteGroceryItem(@PathVariable Long id) {
         Optional<GroceryItem> grocery = groceryItemService.findById(id);
         if (grocery.isPresent()) {
