@@ -7,6 +7,7 @@ import org.springframework.stereotype.Service;
 
 import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 @Service
 public class GroceryItemService {
@@ -43,7 +44,11 @@ public class GroceryItemService {
 
     @Transactional
     public void deleteByIdInBatch(List<GroceryItem> groceryItems) {
-        groceryItemRepo.deleteAllInBatch(groceryItems);
+        List<Long> ids = groceryItems
+                .stream()
+                .map(GroceryItem::getGroceryId)
+                .toList();
+        groceryItemRepo.deleteAllByIdInBatch(ids);
     }
 
     @Transactional

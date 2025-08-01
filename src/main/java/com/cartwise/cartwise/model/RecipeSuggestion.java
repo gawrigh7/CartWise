@@ -36,9 +36,6 @@ public class RecipeSuggestion {
     private List<GroceryItem> groceryItem;
 
     @ManyToMany(mappedBy = "favoriteRecipes")
-    private Set<User> usersWhoFavorited = new HashSet<>();
+    private Set<Users> usersWhoFavorited = new HashSet<>();
 
-    @OneToOne
-    @JoinColumn(name = "nutrition_value", nullable = false)
-    private NutritionValue nutritionValue;
 }

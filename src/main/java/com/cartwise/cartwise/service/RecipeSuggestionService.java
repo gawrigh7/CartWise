@@ -1,9 +1,9 @@
 package com.cartwise.cartwise.service;
 
 import com.cartwise.cartwise.model.RecipeSuggestion;
-import com.cartwise.cartwise.model.User;
+import com.cartwise.cartwise.model.Users;
 import com.cartwise.cartwise.repository.RecipeSuggestionRepo;
-import com.cartwise.cartwise.repository.UserRepo;
+import com.cartwise.cartwise.repository.UsersRepo;
 import jakarta.transaction.Transactional;
 import org.springframework.stereotype.Service;
 
@@ -14,11 +14,11 @@ import java.util.Optional;
 public class RecipeSuggestionService {
 
     private final RecipeSuggestionRepo recipeSuggestionRepo;
-    private final UserRepo userRepo;
+    private final UsersRepo usersRepo;
 
-    public RecipeSuggestionService(RecipeSuggestionRepo recipeSuggestionRepo, UserRepo userRepo) {
+    public RecipeSuggestionService(RecipeSuggestionRepo recipeSuggestionRepo, UsersRepo usersRepo) {
         this.recipeSuggestionRepo = recipeSuggestionRepo;
-        this.userRepo = userRepo;
+        this.usersRepo = usersRepo;
     }
 
     public Optional<RecipeSuggestion> findRecipeSuggestionById(Long id) {
@@ -30,14 +30,14 @@ public class RecipeSuggestionService {
     }
 
     public RecipeSuggestion saveRecipeSuggestion(RecipeSuggestion recipeSuggestion, Long userId) {
-        User user = userRepo.findById(userId).orElseThrow();
-        user.getFavoriteRecipes().add(recipeSuggestion);
-        userRepo.save(user);
+        Users users = usersRepo.findById(userId).orElseThrow();
+        users.getFavoriteRecipes().add(recipeSuggestion);
+        usersRepo.save(users);
         return recipeSuggestion;
     }
 
     public List<RecipeSuggestion> findAllByUser(Long userId) {
-        return userRepo.findFavoriteRecipesByUserId(userId);
+        return usersRepo.findFavoriteRecipesByUsersId(userId);
     }
 
 
@@ -49,9 +49,9 @@ public class RecipeSuggestionService {
     @Transactional
     public void unfavoriteRecipe(Long recipeId, Long userId) {
         RecipeSuggestion recipe = recipeSuggestionRepo.findById(recipeId).orElseThrow();
-        User user = userRepo.findById(userId).orElseThrow();
-        user.getFavoriteRecipes().remove(recipe);
-        userRepo.save(user);
+        Users users = usersRepo.findById(userId).orElseThrow();
+        users.getFavoriteRecipes().remove(recipe);
+        usersRepo.save(users);
     }
 
 

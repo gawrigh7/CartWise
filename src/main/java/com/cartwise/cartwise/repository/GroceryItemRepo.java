@@ -11,5 +11,4 @@ import java.util.Optional;
 public interface GroceryItemRepo extends JpaRepository<GroceryItem, Long> {
 
     Optional<GroceryItem> findByName(String name);
-    void deleteAllByIdInBatch(Iterable<Long> groceryId);
 }

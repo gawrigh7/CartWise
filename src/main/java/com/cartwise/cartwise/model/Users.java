@@ -13,23 +13,23 @@ import java.util.Set;
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
-public class User {
+public class Users {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long userId;
+    private Long usersId;
 
     private String username;
     private String password;
     private String email;
 
-    @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, fetch = FetchType.EAGER)
+    @OneToMany(mappedBy = "users", cascade = CascadeType.ALL, fetch = FetchType.EAGER)
     private List<GroceryItem> groceryItem;
 
     @ManyToMany
     @JoinTable (
-        name = "user_favorites",
-                joinColumns = @JoinColumn(name = "user_id"),
+        name = "users_favorites",
+                joinColumns = @JoinColumn(name = "users_id"),
         inverseJoinColumns = @JoinColumn(name = "recipe_id")
     )
     public Set<RecipeSuggestion> favoriteRecipes = new HashSet<>();

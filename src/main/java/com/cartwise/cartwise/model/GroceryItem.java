@@ -24,7 +24,7 @@ public class GroceryItem {
 
     @ManyToOne
     @JsonIgnore
-    private User user;
+    private Users users;
 
     @ManyToMany
     @JoinTable(
