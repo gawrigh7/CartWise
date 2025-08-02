@@ -17,5 +17,9 @@ public interface UsersRepo extends JpaRepository<Users, Long> {
     List<RecipeSuggestion> findFavoriteRecipesByUsersId(@Param("userId") Long userId);
 
     Users findByUsername(String username);
+    Users findByEmail(String email);
+    boolean existsByUsername(String username);
+    boolean existsByEmail(String email);
+    void deleteById(Long id);
 
 }

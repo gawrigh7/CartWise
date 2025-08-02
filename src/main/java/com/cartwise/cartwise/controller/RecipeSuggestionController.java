@@ -29,12 +29,7 @@ public class RecipeSuggestionController {
 
     @GetMapping("/generate")
     public ResponseEntity<List<RecipeSuggestion>> recipeFromItems() {
-        // List<GroceryItem> groceryItems = groceryItemService.findAll();
-        GroceryItem cheese = new GroceryItem();
-        cheese.setName("Cheese");
-        GroceryItem bread = new GroceryItem();
-        bread.setName("Bread");
-        List<GroceryItem> groceryItems = Arrays.asList(cheese, bread);
+        List<GroceryItem> groceryItems = groceryItemService.findAll();
         String recipeGen = aiService.generateRecipesFromText(groceryItems);
         System.out.println(recipeGen);
         List<RecipeSuggestion> recipeList = aiService.parseRecipeJson(recipeGen);

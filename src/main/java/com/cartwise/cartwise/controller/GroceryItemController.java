@@ -38,6 +38,7 @@ public class GroceryItemController {
 
     @PostMapping
     public ResponseEntity<GroceryItem> addGroceryItem(@RequestBody GroceryItem groceryItem) {
+        groceryItem.setAvailable(true);
         groceryItemService.save(groceryItem);
         return ResponseEntity.ok(groceryItem);
     }
