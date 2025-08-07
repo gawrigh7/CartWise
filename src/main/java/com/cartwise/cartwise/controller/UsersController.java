@@ -6,9 +6,15 @@ import com.cartwise.cartwise.dto.UserRegisterRequest;
 import com.cartwise.cartwise.dto.UsernameChangeRequest;
 import com.cartwise.cartwise.model.GroceryItem;
 import com.cartwise.cartwise.model.Users;
+import com.cartwise.cartwise.service.JwtService;
 import com.cartwise.cartwise.service.UserService;
 import jakarta.validation.Valid;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.authentication.AuthenticationManager;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.Optional;
@@ -19,8 +25,19 @@ public class UsersController {
 
     private final UserService userService;
 
+    @Autowired
+    AuthenticationManager authenticationManager;
+
+    @Autowired
+    JwtService jwtService;
+
     public UsersController(UserService userService) {
         this.userService = userService;
+    }
+
+    @GetMapping("/hello")
+    public String greet() {
+        return "Hello World ";
     }
 
     @GetMapping("/{username}")
@@ -50,6 +67,18 @@ public class UsersController {
 
         Users savedUser = userService.registerUser(user);
         return ResponseEntity.status(201).body(savedUser);
+    }
+
+    @PostMapping("/login")
+    public ResponseEntity<String> loginUser(@Valid @RequestBody Users user) {
+        Authentication auth =authenticationManager
+                .authenticate(new UsernamePasswordAuthenticationToken(user.getUsername(), user.getPassword()));
+
+        if (auth.isAuthenticated()) {
+            return ResponseEntity.ok(jwtService.generateToken(user.getUsername()));
+        } else {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
+        }
     }
 
     @PutMapping("/{username}/password")
