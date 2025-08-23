@@ -4,6 +4,10 @@ public class PasswordChangeRequest {
 
     private String newPassword;
 
+    public PasswordChangeRequest(String newPassword) {
+        this.newPassword = newPassword;
+    }
+
     public String getNewPassword() {
         return newPassword;
     }

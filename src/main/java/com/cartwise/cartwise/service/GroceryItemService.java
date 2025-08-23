@@ -1,58 +1,62 @@
 package com.cartwise.cartwise.service;
 
 import com.cartwise.cartwise.model.GroceryItem;
+import com.cartwise.cartwise.model.User;
 import com.cartwise.cartwise.repository.GroceryItemRepo;
-import jakarta.transaction.Transactional;
+import com.cartwise.cartwise.repository.UserRepo;
+import com.cartwise.cartwise.util.SecurityUtil;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 import java.util.Optional;
-import java.util.stream.Collectors;
 
 @Service
 public class GroceryItemService {
 
-    private final GroceryItemRepo groceryItemRepo;
-    private final AiService aiService;
+    private final GroceryItemRepo repo;
+    private final UserRepo userRepo;
 
-    public GroceryItemService(GroceryItemRepo groceryItemRepo, AiService aiService) {
-        this.groceryItemRepo = groceryItemRepo;
-        this.aiService = aiService;
+    public GroceryItemService(GroceryItemRepo repo, UserRepo userRepo) {
+        this.repo = repo;
+        this.userRepo = userRepo;
     }
 
     public Optional<GroceryItem> findByName(String name) {
-        return groceryItemRepo.findByName(name);
+        Long userId = SecurityUtil.getCurrentUserId();
+        return repo.findByUserUserIdAndName(userId, name);
     }
 
-
     public List<GroceryItem> findAll() {
-        return groceryItemRepo.findAll();
+        Long userId = SecurityUtil.getCurrentUserId();
+        return repo.findAllByUserUserId(userId);
     }
 
     public Optional<GroceryItem> findById(Long groceryId) {
-        return groceryItemRepo.findById(groceryId);
-    }
-
-    public GroceryItem save(GroceryItem groceryItem) {
-        return groceryItemRepo.save(groceryItem);
+        Long userId = SecurityUtil.getCurrentUserId();
+        return repo.findByUserUserIdAndGroceryId(userId, groceryId);
     }
 
     @Transactional
-    public void delete(GroceryItem groceryItem) {
-        groceryItemRepo.delete(groceryItem);
+    public GroceryItem save(GroceryItem item) {
+        Long userId = SecurityUtil.getCurrentUserId();
+        User ownerRef = userRepo.getReferenceById(userId);
+        item.setUser(ownerRef);
+        return repo.save(item);
     }
 
     @Transactional
-    public void deleteByIdInBatch(List<GroceryItem> groceryItems) {
-        List<Long> ids = groceryItems
-                .stream()
-                .map(GroceryItem::getGroceryId)
-                .toList();
-        groceryItemRepo.deleteAllByIdInBatch(ids);
+    public void delete(Long groceryId) {
+        Long userId = SecurityUtil.getCurrentUserId();
+        long deleted = repo.deleteByUserUserIdAndGroceryId(userId, groceryId);
+        if (deleted == 0) throw new RuntimeException("Item not found");
     }
 
     @Transactional
-    public void deleteById(Long id) {
-        groceryItemRepo.deleteById(id);
+    public void deleteByIdInBatch(List<Long> ids) {
+        Long userId = SecurityUtil.getCurrentUserId();
+        if (ids != null && !ids.isEmpty()) {
+            repo.deleteByUserIdAndIdIn(userId, ids);
+        }
     }
 }

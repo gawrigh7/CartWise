@@ -1,11 +1,12 @@
 package com.cartwise.cartwise.service;
 
 import com.cartwise.cartwise.model.RecipeSuggestion;
-import com.cartwise.cartwise.model.Users;
+import com.cartwise.cartwise.model.User;
 import com.cartwise.cartwise.repository.RecipeSuggestionRepo;
-import com.cartwise.cartwise.repository.UsersRepo;
-import jakarta.transaction.Transactional;
+import com.cartwise.cartwise.repository.UserRepo;
+import com.cartwise.cartwise.util.SecurityUtil;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 import java.util.Optional;
@@ -13,48 +14,38 @@ import java.util.Optional;
 @Service
 public class RecipeSuggestionService {
 
-    private final RecipeSuggestionRepo recipeSuggestionRepo;
-    private final UsersRepo usersRepo;
+    private final RecipeSuggestionRepo recipeRepo;
+    private final UserRepo userRepo;
 
-    public RecipeSuggestionService(RecipeSuggestionRepo recipeSuggestionRepo, UsersRepo usersRepo) {
-        this.recipeSuggestionRepo = recipeSuggestionRepo;
-        this.usersRepo = usersRepo;
+    public RecipeSuggestionService(RecipeSuggestionRepo recipeRepo, UserRepo userRepo) {
+        this.recipeRepo = recipeRepo;
+        this.userRepo = userRepo;
     }
 
+    @Transactional(readOnly = true)
     public Optional<RecipeSuggestion> findRecipeSuggestionById(Long id) {
-        return recipeSuggestionRepo.findById(id);
+        Long userId = SecurityUtil.getCurrentUserId();
+        return recipeRepo.findByUserUserIdAndRecipeId(userId, id);
     }
 
-    public List<RecipeSuggestion> findAllRecipeSuggestions() {
-        return recipeSuggestionRepo.findAll();
-    }
-
-    public RecipeSuggestion saveRecipeSuggestion(RecipeSuggestion recipeSuggestion, Long userId) {
-        Users users = usersRepo.findById(userId).orElseThrow();
-        users.getFavoriteRecipes().add(recipeSuggestion);
-        usersRepo.save(users);
-        return recipeSuggestion;
-    }
-
-    public List<RecipeSuggestion> findAllByUser(Long userId) {
-        return usersRepo.findFavoriteRecipesByUsersId(userId);
-    }
-
-
-    @Transactional
-    public void deleteRecipeSuggestion(RecipeSuggestion recipeSuggestion) {
-        recipeSuggestionRepo.delete(recipeSuggestion);
+    @Transactional(readOnly = true)
+    public List<RecipeSuggestion> findAllByUser() {
+        Long userId = SecurityUtil.getCurrentUserId();
+        return recipeRepo.findFavoriteRecipesByUserUserId(userId);
     }
 
     @Transactional
-    public void unfavoriteRecipe(Long recipeId, Long userId) {
-        RecipeSuggestion recipe = recipeSuggestionRepo.findById(recipeId).orElseThrow();
-        Users users = usersRepo.findById(userId).orElseThrow();
-        users.getFavoriteRecipes().remove(recipe);
-        usersRepo.save(users);
+    public RecipeSuggestion saveRecipeSuggestion(RecipeSuggestion recipeSuggestion) {
+        Long userId = SecurityUtil.getCurrentUserId();
+        User ownerRef = userRepo.getReferenceById(userId);
+        recipeSuggestion.setUser(ownerRef);
+        return recipeRepo.save(recipeSuggestion);
     }
 
-
-
-
+    @Transactional
+    public void deleteForCurrentUser(Long recipeId) {
+        Long userId = SecurityUtil.getCurrentUserId();
+        long deleted = recipeRepo.deleteByUserUserIdAndRecipeId(userId, recipeId);
+        if (deleted == 0) throw new RuntimeException("Recipe not found");
+    }
 }

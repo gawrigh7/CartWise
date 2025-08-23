@@ -32,10 +32,14 @@ public class RecipeSuggestion {
     )
     private List<GroceryItem> ingredients;
 
+    @ManyToOne
+    @JoinColumn(name = "user_id")
+    private User user;
+
+
     @ManyToMany(mappedBy = "recipeSuggestion")
     private List<GroceryItem> groceryItem;
 
-    @ManyToMany(mappedBy = "favoriteRecipes")
-    private Set<Users> usersWhoFavorited = new HashSet<>();
+
 
 }
