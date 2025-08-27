@@ -9,7 +9,7 @@ public class RecipeSuggestionDto {
     private List<IngredientDto> ingredients;
 
     public static class IngredientDto {
-        private Long id;    // groceryId
+        private Long id;
         private String name;
 
         public IngredientDto() {}

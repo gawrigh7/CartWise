@@ -14,7 +14,7 @@ public interface RecipeSuggestionRepo extends JpaRepository<RecipeSuggestion, Lo
 
     Optional<RecipeSuggestion> findByUserUserIdAndRecipeId(Long userId, Long recipeId);
 
-    long deleteByUserUserIdAndRecipeId(Long userId, Long recipeId);
+    void deleteByRecipeIdAndUserUserId(Long recipeId, Long userId);
 
     @Query("SELECT u.favoriteRecipes FROM User u WHERE u.userId = :userId")
     List<RecipeSuggestion> findFavoriteRecipesByUserUserId(@Param("userId") Long userId);

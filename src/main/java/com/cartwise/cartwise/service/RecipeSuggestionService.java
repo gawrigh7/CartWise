@@ -45,7 +45,6 @@ public class RecipeSuggestionService {
     @Transactional
     public void deleteForCurrentUser(Long recipeId) {
         Long userId = SecurityUtil.getCurrentUserId();
-        long deleted = recipeRepo.deleteByUserUserIdAndRecipeId(userId, recipeId);
-        if (deleted == 0) throw new RuntimeException("Recipe not found");
+        recipeRepo.deleteByRecipeIdAndUserUserId(recipeId, userId);
     }
 }

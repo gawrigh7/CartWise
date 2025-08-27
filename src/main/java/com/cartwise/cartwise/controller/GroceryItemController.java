@@ -31,9 +31,11 @@ public class GroceryItemController {
     }
 
     @PostMapping
-    public ResponseEntity<GroceryItem> create(@RequestBody GroceryItem item) {
-        if (!item.isAvailable()) item.setAvailable(true);
-        var saved = service.save(item);
+    public ResponseEntity<GroceryItem> create(@RequestBody String item) {
+        GroceryItem groceryItem = new GroceryItem();
+        groceryItem.setName(item);
+        if (!groceryItem.isAvailable()) groceryItem.setAvailable(true);
+        var saved = service.save(groceryItem);
         return ResponseEntity.created(URI.create("/api/grocery-items/" + saved.getGroceryId()))
                 .body(saved);
     }
