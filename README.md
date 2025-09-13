@@ -1,9 +1,10 @@
 **CartWise**
 
 CartWise is a full-stack grocery and recipe web application designed to help users manage groceries, plan meals, and receive AI-based recipe suggestions. The application is built with Spring Boot (Java 21) on the backend and React with Tailwind CSS on the frontend.
-\n
+<br><br>
 
 **I. Features**
+<br><br>
 
 Authentication and Authorization: JWT-based login, signup, and secure session management.
 
@@ -12,9 +13,10 @@ Grocery Management: Create, update, and track groceries, each scoped to the auth
 Recipe Suggestions: Integration with the OpenAI API to generate recipe recommendations.
 
 Backend: Controllers, services, repositories, DTOs, and mappers for maintainability.
-
+<br><br>
 
 **II. Technology Stack**
+<br><br>
 
 **Frontend** (Still in development)
 
@@ -22,6 +24,7 @@ React (TypeScript)
 
 Tailwind CSS
 
+<br>
 
 **Backend**
 
@@ -33,6 +36,7 @@ PostgreSQL via JPA / Hibernate
 
 Maven
 
+<br>
 
 **Other**
 
