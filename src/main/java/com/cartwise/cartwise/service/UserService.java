@@ -1,11 +1,10 @@
 package com.cartwise.cartwise.service;
 
 import com.cartwise.cartwise.model.RecipeSuggestion;
-import com.cartwise.cartwise.model.Users;
+import com.cartwise.cartwise.model.User;
 import com.cartwise.cartwise.model.UsersPrinciple;
-import com.cartwise.cartwise.repository.UsersRepo;
+import com.cartwise.cartwise.repository.UserRepo;
 import jakarta.transaction.Transactional;
-import org.hibernate.validator.internal.constraintvalidators.bv.time.future.FutureValidatorForInstant;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
@@ -16,78 +15,73 @@ import java.util.List;
 @Service
 public class UserService implements UserDetailsService {
 
-    private final UsersRepo usersRepo;
+    private final UserRepo userRepo;
     private BCryptPasswordEncoder encoder = new BCryptPasswordEncoder(12);
 
-    public UserService(UsersRepo usersRepo) {
-        this.usersRepo = usersRepo;
+    public UserService(UserRepo userRepo) {
+        this.userRepo = userRepo;
     }
+
 
     public List<RecipeSuggestion> getFavoritesForUser(Long userId) {
-        return usersRepo.findFavoriteRecipesByUsersId(userId);
+        return userRepo.findFavoriteRecipesByUsersId(userId);
     }
 
-    public Users registerUser(Users user) {
-        if (usersRepo.existsByUsername(user.getUsername())) {
+    public User registerUser(User user) {
+        if (userRepo.existsByUsername(user.getUsername())) {
             throw new IllegalArgumentException("Username already taken");
         }
-        if (usersRepo.existsByEmail(user.getEmail())) {
+        if (userRepo.existsByEmail(user.getEmail())) {
             throw new IllegalArgumentException("Email already in use");
         }
         user.setPassword(encoder.encode(user.getPassword()));
-        return usersRepo.save(user);
+        return userRepo.save(user);
+    }
+
+    @Transactional
+    public void changePassword(Long userId, String newPassword) {
+        User user = getByUserId(userId);
+        user.setPassword(encoder.encode(newPassword));
+        userRepo.save(user);
+    }
+
+    @Transactional
+    public void deleteUser(Long userId) {
+        userRepo.deleteById(userId);
+    }
+
+    @Transactional
+    public void changeUsername(Long userId, String newUsername) {
+        User user = getByUserId(userId);
+        if (userRepo.existsByUsername(newUsername)) {
+            throw new RuntimeException("Username already taken");
+        }
+        user.setUsername(newUsername);
+        userRepo.save(user);
+    }
+
+    public User getByUserId(Long userId) {
+        if (userRepo.findByUsersId(userId) == null) {
+            throw new UsernameNotFoundException("User not found");
+        }
+        return userRepo.findByUsersId(userId);
+    }
+
+    public boolean existsByUsername(String username) {
+        return userRepo.existsByUsername(username);
+    }
+
+    public boolean existsByEmail(String email) {
+        return userRepo.existsByEmail(email);
     }
 
     @Override
     public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
-        Users user = usersRepo.findByUsername(username);
+        User user = userRepo.findByUsername(username);
         if (user == null) {
             throw new UsernameNotFoundException(username);
         }
 
         return new UsersPrinciple(user);
-    }
-
-    @Transactional
-    public void changePassword(String username, String newPassword) {
-        Users user = getByUsername(username);
-        user.setPassword(encoder.encode(newPassword));
-        usersRepo.save(user);
-    }
-
-    @Transactional
-    public void deleteUser(Users user) {
-        usersRepo.delete(user);
-    }
-
-    public void changeUsername(String username, String newUsername) {
-        Users user = getByUsername(username);
-        if (usersRepo.existsByUsername(newUsername)) {
-            throw new RuntimeException("Username already taken");
-        }
-        user.setUsername(newUsername);
-        usersRepo.save(user);
-    }
-
-    public Users getByEmail(String email) {
-        if (usersRepo.findByEmail(email) == null) {
-            throw new UsernameNotFoundException(email);
-        }
-        return usersRepo.findByEmail(email);
-    }
-
-    public Users getByUsername(String username) {
-        if (usersRepo.findByUsername(username) == null) {
-            throw new UsernameNotFoundException(username);
-        }
-        return usersRepo.findByUsername(username);
-    }
-
-    public boolean existsByUsername(String username) {
-        return usersRepo.existsByUsername(username);
-    }
-
-    public boolean existsByEmail(String email) {
-        return usersRepo.existsByEmail(email);
     }
 }

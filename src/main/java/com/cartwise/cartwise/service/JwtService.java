@@ -1,5 +1,6 @@
 package com.cartwise.cartwise.service;
 
+import com.cartwise.cartwise.model.UsersPrinciple;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.SignatureAlgorithm;
@@ -39,13 +40,14 @@ public class JwtService {
         }
     }
 
-    public String generateToken(String username) {
+    public String generateToken(UsersPrinciple user) {
 
         Map<String, Object> claims = new HashMap<String, Object>();
+        claims.put("userId", user.getUsersId());
 
         return Jwts.builder()
                 .claims(claims)
-                .subject(username)
+                .subject(user.getUsername())
                 .issuedAt(new Date(System.currentTimeMillis()))
                 .expiration(new Date(System.currentTimeMillis() + 1000 * 60 * 3))
                 .signWith(getKey(), SignatureAlgorithm.HS256)
@@ -61,6 +63,11 @@ public class JwtService {
         return extractClaim(token, Claims::getSubject);
     }
 
+    public Long extractUserId(String token) {
+        return extractClaim(token, claims -> claims.get("userId", Long.class));
+    }
+
+
     private <T> T extractClaim(String token, Function<Claims, T> claimResolver) {
         final Claims claims = extractAllClaims(token);
         return claimResolver.apply(claims);
@@ -73,9 +80,13 @@ public class JwtService {
     }
 
 
-    public boolean validateToken(String token, UserDetails userDetails) {
-        final String userName = extractUserName(token);
-        return (userName.equals(userDetails.getUsername()) && !isTokenExpired(token));
+    public boolean validateToken(String token) {
+        try {
+            extractAllClaims(token);
+            return true;
+        } catch (Exception e) {
+            return false;
+        }
     }
 
     private boolean isTokenExpired(String token) {

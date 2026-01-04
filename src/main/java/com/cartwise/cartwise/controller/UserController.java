@@ -3,11 +3,14 @@ package com.cartwise.cartwise.controller;
 
 import com.cartwise.cartwise.dto.PasswordChangeRequest;
 import com.cartwise.cartwise.dto.UserRegisterRequest;
+import com.cartwise.cartwise.dto.UserResponseDto;
 import com.cartwise.cartwise.dto.UsernameChangeRequest;
-import com.cartwise.cartwise.model.GroceryItem;
-import com.cartwise.cartwise.model.Users;
+import com.cartwise.cartwise.mapper.UserMapper;
+import com.cartwise.cartwise.model.User;
+import com.cartwise.cartwise.model.UsersPrinciple;
 import com.cartwise.cartwise.service.JwtService;
 import com.cartwise.cartwise.service.UserService;
+import com.cartwise.cartwise.util.SecurityUtil;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -17,11 +20,9 @@ import org.springframework.security.authentication.UsernamePasswordAuthenticatio
 import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.Optional;
-
 @RestController
 @RequestMapping("/api/user")
-public class UsersController {
+public class UserController {
 
     private final UserService userService;
 
@@ -31,20 +32,19 @@ public class UsersController {
     @Autowired
     JwtService jwtService;
 
-    public UsersController(UserService userService) {
+    @Autowired
+    UserMapper userMapper;
+
+    public UserController(UserService userService) {
         this.userService = userService;
     }
 
-    @GetMapping("/hello")
-    public String greet() {
-        return "Hello World ";
-    }
 
-    @GetMapping("/{username}")
-    public ResponseEntity<Users> getUserByUsername(@PathVariable String username) {
-        Users user = userService.getByUsername(username);
-
-        return ResponseEntity.ok(user);
+    @GetMapping("/me")
+    public ResponseEntity<UserResponseDto> getCurrentUser() {
+        Long userId = SecurityUtil.getCurrentUserId();
+        User user = userService.getByUserId(userId);
+        return ResponseEntity.ok(userMapper.toDto(user));
     }
 
     @GetMapping("/exists/username/{username}")
@@ -60,48 +60,47 @@ public class UsersController {
 
     @PostMapping("/register")
     public ResponseEntity<?> createUser(@Valid @RequestBody UserRegisterRequest request) {
-        Users user = new Users();
+        User user = new User();
         user.setUsername(request.getUsername());
         user.setEmail(request.getEmail());
         user.setPassword(request.getPassword());
 
-        Users savedUser = userService.registerUser(user);
+        User savedUser = userService.registerUser(user);
         return ResponseEntity.status(201).body(savedUser);
     }
 
     @PostMapping("/login")
-    public ResponseEntity<String> loginUser(@Valid @RequestBody Users user) {
+    public ResponseEntity<String> loginUser(@Valid @RequestBody User user) {
         Authentication auth =authenticationManager
                 .authenticate(new UsernamePasswordAuthenticationToken(user.getUsername(), user.getPassword()));
 
         if (auth.isAuthenticated()) {
-            return ResponseEntity.ok(jwtService.generateToken(user.getUsername()));
+            UsersPrinciple principle = (UsersPrinciple) auth.getPrincipal();
+            return ResponseEntity.ok(jwtService.generateToken(principle));
         } else {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
         }
     }
 
-    @PutMapping("/{username}/password")
-    public ResponseEntity<String> changePassword(@PathVariable String username, @RequestBody PasswordChangeRequest request) {
-        userService.changePassword(username, request.getNewPassword());
+    @PutMapping("/me/password")
+    public ResponseEntity<String> changePassword(@RequestBody PasswordChangeRequest request) {
+        Long userId = SecurityUtil.getCurrentUserId();
+        userService.changePassword(userId, request.getNewPassword());
         return ResponseEntity.ok("Password changed");
     }
 
-    @PutMapping("/{username}/username")
-    public ResponseEntity<String> changeUsername(@PathVariable String username, @RequestBody UsernameChangeRequest request) {
-        userService.changeUsername(username, request.getNewUsername());
+    @PutMapping("/me/username")
+    public ResponseEntity<String> changeUsername(@RequestBody UsernameChangeRequest request) {
+        Long userId = SecurityUtil.getCurrentUserId();
+        userService.changeUsername(userId, request.getNewUsername());
         return ResponseEntity.ok("Username changed");
     }
 
-    @DeleteMapping("/{username}")
-    public ResponseEntity<Void> deleteUser(@PathVariable String username) {
-        Users deletedUser = userService.getByUsername(username);
-        if (deletedUser != null) {
-            userService.deleteUser(deletedUser);
-            return ResponseEntity.noContent().build();
-        } else {
-            return ResponseEntity.notFound().build();
-        }
+    @DeleteMapping("/me/delete")
+    public ResponseEntity<Void> deleteUser() {
+        Long userId = SecurityUtil.getCurrentUserId();
+        userService.deleteUser(userId);
+        return ResponseEntity.noContent().build();
     }
 
 }

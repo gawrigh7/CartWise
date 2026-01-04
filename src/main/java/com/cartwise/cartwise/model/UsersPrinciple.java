@@ -9,11 +9,18 @@ import java.util.List;
 
 public class UsersPrinciple implements UserDetails {
 
-    private Users users;
+    private User user;
 
-    public UsersPrinciple(Users users) {
-        this.users = users;
+    public UsersPrinciple(User user) {
+        this.user = user;
     }
+
+    public UsersPrinciple(Long id, String username) {
+        this.user = new User();
+        this.user.setUsersId(id);
+        this.user.setUsername(username);
+    }
+
 
     @Override
     public boolean isEnabled() {
@@ -37,12 +44,16 @@ public class UsersPrinciple implements UserDetails {
 
     @Override
     public String getUsername() {
-        return users.getUsername();
+        return user.getUsername();
     }
 
     @Override
     public String getPassword() {
-        return users.getPassword();
+        return user.getPassword();
+    }
+
+    public Long getUsersId() {
+        return user.getUsersId();
     }
 
     @Override

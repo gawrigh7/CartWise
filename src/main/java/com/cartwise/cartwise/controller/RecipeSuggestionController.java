@@ -1,5 +1,7 @@
 package com.cartwise.cartwise.controller;
 
+import com.cartwise.cartwise.dto.RecipeSuggestionDto;
+import com.cartwise.cartwise.mapper.RecipeSuggestionMapper;
 import com.cartwise.cartwise.model.GroceryItem;
 import com.cartwise.cartwise.model.RecipeSuggestion;
 import com.cartwise.cartwise.service.AiService;
@@ -10,47 +12,65 @@ import org.springframework.web.bind.annotation.RestController;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.Arrays;
+import java.net.URI;
 import java.util.List;
 
 @RestController
-@RequestMapping("/api/recipe")
+@RequestMapping("/api/recipes")
 public class RecipeSuggestionController {
 
-    private final RecipeSuggestionService recipeSuggestionService;
+    private final RecipeSuggestionService recipeService;
     private final AiService aiService;
     private final GroceryItemService groceryItemService;
+    private final RecipeSuggestionMapper recipeSuggestionMapper;
 
-    public RecipeSuggestionController(AiService aiService, GroceryItemService groceryItemService, RecipeSuggestionService recipeSuggestionService) {
+    public RecipeSuggestionController(
+            AiService aiService,
+            GroceryItemService groceryItemService,
+            RecipeSuggestionService recipeService,
+            RecipeSuggestionMapper recipeSuggestionMapper) {
         this.aiService = aiService;
         this.groceryItemService = groceryItemService;
-        this.recipeSuggestionService = recipeSuggestionService;
+        this.recipeService = recipeService;
+        this.recipeSuggestionMapper = recipeSuggestionMapper;
     }
 
-    @GetMapping("/generate")
-    public ResponseEntity<List<RecipeSuggestion>> recipeFromItems() {
-        List<GroceryItem> groceryItems = groceryItemService.findAll();
-        String recipeGen = aiService.generateRecipesFromText(groceryItems);
-        System.out.println(recipeGen);
-        List<RecipeSuggestion> recipeList = aiService.parseRecipeJson(recipeGen);
-        return ResponseEntity.ok(recipeList);
-    }
-    @GetMapping("/favorites")
-    public ResponseEntity<List<RecipeSuggestion>> getFavoritesByUser(@RequestParam Long userId) {
-        List<RecipeSuggestion> recipes = recipeSuggestionService.findAllByUser(userId);
-        return ResponseEntity.ok(recipes);
+    @PostMapping("/generate")
+    public ResponseEntity<List<RecipeSuggestionDto>> generateFromMyItems() {
+        List<GroceryItem> myItems = groceryItemService.findAll();
+        String raw = aiService.generateRecipesFromText(myItems);
+        List<RecipeSuggestion> suggestions = aiService.parseRecipeJson(raw);
+        List<RecipeSuggestionDto> suggestionDto = suggestions.stream()
+                .map(recipeSuggestionMapper::toRecipeDto).toList();
+        return ResponseEntity.ok(suggestionDto);
     }
 
-    @PostMapping("/favorite")
-    public ResponseEntity<RecipeSuggestion> saveRecipeSuggestion(@RequestBody  RecipeSuggestion recipeSuggestion, @RequestParam Long userId) {
-        RecipeSuggestion rs = recipeSuggestionService.saveRecipeSuggestion(recipeSuggestion, userId);
-        return ResponseEntity.status(201).body(rs);
+    @GetMapping
+    public ResponseEntity<List<RecipeSuggestionDto>> listMyRecipes() {
+        List<RecipeSuggestionDto> recipeDto = recipeService.findAllByUser()
+                .stream().map(recipeSuggestionMapper::toRecipeDto).toList();
+        return ResponseEntity.ok(recipeDto);
     }
 
+    @GetMapping("/{id}")
+    public ResponseEntity<RecipeSuggestionDto> getMyRecipe(@PathVariable Long id) {
+        return recipeService.findRecipeSuggestionById(id).map(recipeSuggestionMapper::toRecipeDto)
+                .map(ResponseEntity::ok)
+                .orElseGet(() -> ResponseEntity.notFound().build());
+    }
 
-    @DeleteMapping("/unfavorite")
-    public ResponseEntity<Void> unfavoriteRecipe(@RequestParam Long recipeId, @RequestParam Long userId) {
-        recipeSuggestionService.unfavoriteRecipe(recipeId, userId);
+    @PostMapping
+    public ResponseEntity<RecipeSuggestionDto> saveMyRecipe(@RequestBody RecipeSuggestionDto recipe) {
+        RecipeSuggestion save = recipeService.saveRecipeSuggestion(recipeSuggestionMapper.fromRecipeCreateDto(recipe));
+        RecipeSuggestionDto savedDto = recipeSuggestionMapper.toRecipeDto(save);
+        return ResponseEntity
+                .created(URI.create("/api/recipes/" + savedDto.getRecipeId()))
+                .body(savedDto);
+    }
+
+    @DeleteMapping("/{id}")
+    public ResponseEntity<Void> deleteMyRecipe(@PathVariable Long id) {
+        recipeService.deleteForCurrentUser(id);
         return ResponseEntity.noContent().build();
     }
 

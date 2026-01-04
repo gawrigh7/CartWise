@@ -5,9 +5,7 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
-import java.util.HashSet;
 import java.util.List;
-import java.util.Set;
 
 @Entity
 @Data
@@ -21,7 +19,6 @@ public class RecipeSuggestion {
 
     private String title;
     private String description;
-    private boolean favorite;
 
 
     @ManyToMany
@@ -35,7 +32,8 @@ public class RecipeSuggestion {
     @ManyToMany(mappedBy = "recipeSuggestion")
     private List<GroceryItem> groceryItem;
 
-    @ManyToMany(mappedBy = "favoriteRecipes")
-    private Set<Users> usersWhoFavorited = new HashSet<>();
+    @ManyToOne
+    @JoinColumn(name = "user_id")
+    private User user;
 
 }
