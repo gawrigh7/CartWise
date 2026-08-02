@@ -23,6 +23,8 @@ import java.util.function.Function;
 @Service
 public class JwtService {
 
+    private static final long EXPIRATION_MS = 1000L * 60 * 60 * 24;
+
     private String secretKey;
 
     public JwtService() {
@@ -49,7 +51,7 @@ public class JwtService {
                 .claims(claims)
                 .subject(user.getUsername())
                 .issuedAt(new Date(System.currentTimeMillis()))
-                .expiration(new Date(System.currentTimeMillis() + 1000 * 60 * 3))
+                .expiration(new Date(System.currentTimeMillis() + EXPIRATION_MS))
                 .signWith(getKey(), SignatureAlgorithm.HS256)
                 .compact();
     }
