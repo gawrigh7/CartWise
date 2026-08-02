@@ -47,6 +47,17 @@ public class GroceryItemService {
     }
 
     @Transactional
+    public Optional<GroceryItem> update(Long groceryId, String name, boolean available) {
+        Long userId = SecurityUtil.getCurrentUserId();
+        return groceryItemRepo.findByUserUsersIdAndGroceryId(userId, groceryId)
+                .map(item -> {
+                    item.setName(name);
+                    item.setAvailable(available);
+                    return groceryItemRepo.save(item);
+                });
+    }
+
+    @Transactional
     public void delete(Long groceryId) {
         Long userId = SecurityUtil.getCurrentUserId();
         groceryItemRepo.deleteByUserUsersIdAndGroceryId(userId, groceryId);

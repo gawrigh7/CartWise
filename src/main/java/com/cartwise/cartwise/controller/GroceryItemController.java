@@ -63,9 +63,10 @@ public class GroceryItemController {
 
     @PutMapping("/{id}")
     public ResponseEntity<GroceryItemDto> updateItem(@PathVariable Long id, @RequestBody @Valid GroceryItemUpdateDto req) {
-        var toUpdate = groceryItemMapper.fromUpdateDto(id, req);
-        var saved = groceryItemService.save(toUpdate);
-        return ResponseEntity.ok(groceryItemMapper.toDto(saved));
+        return groceryItemService.update(id, req.getName(), req.isAvailable())
+                .map(groceryItemMapper::toDto)
+                .map(ResponseEntity::ok)
+                .orElseGet(() -> ResponseEntity.notFound().build());
     }
 
     @DeleteMapping("/{id}")

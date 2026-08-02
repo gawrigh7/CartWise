@@ -46,7 +46,11 @@ public class RateLimitInterceptor implements HandlerInterceptor {
     }
 
     private String resolveUserKey(HttpServletRequest request) {
-        return request.getHeader("X-User-Id");
+        try {
+            return "user:" + SecurityUtil.getCurrentUserId();
+        } catch (IllegalStateException e) {
+            return null;
+        }
     }
 }
 
